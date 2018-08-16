@@ -14,6 +14,7 @@ LIBS		= -llsocket
 SRCS		= src/main.c
 SRCS		+= src/netsend.c
 SRCS		+= src/netreceive.c
+SRCS		+= src/display.c
 
 OBJS		= $(SRCS:.c=.o)
 

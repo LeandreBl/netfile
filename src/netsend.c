@@ -11,6 +11,8 @@
 #include <sys/stat.h>
 #include <lsocket.h>
 
+#include "netfile.h"
+
 static int send_header(lsocket_t *socket, struct stat *st)
 {
 	uint16_t magic = 0xca0c;
@@ -40,8 +42,7 @@ static int snloop(lsocket_t *socket, int fd, uint64_t filesize)
 		if (wr == 0 || wr == -1 || rd != wr)
 			return (-1);
 		done += wr;
-		printf("\rTransfert: [% 3d%%]", (int)((double)done / (double)filesize * 100));
-		fflush(stdin);
+		netdisplay(filesize, done);
 	}
 	return (0);
 }

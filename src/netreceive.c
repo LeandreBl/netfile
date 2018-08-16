@@ -11,6 +11,8 @@
 #include <lsocket.h>
 #include <stdbool.h>
 
+#include "netfile.h"
+
 static bool is_a_packet(int fd)
 {
 	uint16_t magic;
@@ -45,8 +47,7 @@ static int rcloop(lsocket_t *client, int fd)
 		if (wr == 0 || wr == -1 || rd != wr)
 			return (-1);
 		done += wr;
-		printf("\rTransfert: [% 3d%%]", (int)((double)done / (double)filesize * 100));
-		fflush(stdin);
+		netdisplay(filesize, done);
 	}
 	return (0);
 }
