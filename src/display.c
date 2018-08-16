@@ -16,7 +16,7 @@ void netdisplay(uint64_t total, uint64_t done)
 	perc = (double)done / (double)total * 100;
 	if (perc != prev) {
 		printf("\rTransfert: [% 3d]%%", perc);
-		fflush(stdin);
+		fflush(stdout);
 		prev = perc;
 	}
 }
