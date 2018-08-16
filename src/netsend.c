@@ -40,7 +40,8 @@ static int snloop(lsocket_t *socket, int fd, uint64_t filesize)
 		if (wr == 0 || wr == -1 || rd != wr)
 			return (-1);
 		done += wr;
-		printf("\rTransfert: [%03d%%]\n", (int)((double)done / (double)filesize * 100));
+		printf("\rTransfert: [% 3d%%]", (int)((double)done / (double)filesize * 100));
+		fflush(stdin);
 	}
 	return (0);
 }
