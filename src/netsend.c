@@ -31,7 +31,7 @@ static int snloop(lsocket_t *socket, int fd, uint64_t filesize)
 	ssize_t rd;
 	ssize_t wr;
 
-	printf("Sending file of size %lu\n", (long unsigned int)filesize);
+	printf("Sending file of size %lu bytes:\n", (long unsigned int)filesize);
 	while (done < filesize) {
 		rd = read(fd, buffer, sizeof(buffer));
 		if (rd == 0 || rd == -1)
