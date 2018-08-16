@@ -20,7 +20,7 @@ OBJS		= $(SRCS:.c=.o)
 RM		= rm -f
 
 CFLAGS		= -Werror -Wall -Wextra
-CFLAGS		+= -I ./include
+CFLAGS		+= -I ./include -std=gnu99
 # uncomment this for debug flag
 # CFLAGS		+= -g3
 
