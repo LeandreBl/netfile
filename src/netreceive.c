@@ -36,7 +36,7 @@ static int rcloop(lsocket_t *client, int fd)
 	}
 	if (read(client->fd, &filesize, sizeof(filesize)) != sizeof(filesize))
 		return (-1);
-	printf("Downloading file of size %lu:\n", filesize);
+	printf("Downloading file of size %lu:\n", (long unsigned int)filesize);
 	while (done < filesize) {
 		rd = read(client->fd, buffer, sizeof(buffer));
 		if (rd == 0 || rd == -1)
