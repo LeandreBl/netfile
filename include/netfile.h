@@ -35,6 +35,4 @@ uint8_t index_unit(unsigned long int value);
 void netdisplay(netfile_t *netf);
 void display_filesize(unsigned long int value);
 
-loff_t llseek(int fd, loff_t offset, int whence);
-
 #endif /* !NETFILE_H_ */
