@@ -59,15 +59,17 @@ void netdisplay(netfile_t *netf)
 
 	gettimeofday(&tv, NULL);
 	elapsed = (tv.tv_sec - netf->tv.tv_sec);
-	perc = (double)netf->transfered / (double)netf->filesize * 100;
-	if (perc != netf->percentage || elapsed > 1) {
-		clear_line();
-		i = index_unit(transfered);
+	i = index_unit(transfered);
+	if (elapsed >= 1) {
+		netf->lastsize = netf->transfered;
 		netf->speed = cut_with(transfered, i);
+		netf->tv = tv;
+	}
+	perc = (double)netf->transfered / (double)netf->filesize * 100;
+	if (perc > netf->percentage) {
+		clear_line();
 		printf("\rTransfert: [%d%%] at [%.3f %s/s]", perc, netf->speed, units[i]);
 		fflush(stdout);
-		netf->lastsize = netf->transfered;
 		netf->percentage = perc;
-		netf->tv = tv;
 	}
 }
