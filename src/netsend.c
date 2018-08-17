@@ -5,10 +5,10 @@
 ** netsend
 */
 
+#define _LARGEFILE64_SOURCE
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <lsocket.h>
 #include <string.h>
 
@@ -54,13 +54,13 @@ int netsend(const char *filename, const char *ipaddr, uint16_t port)
 	netfile_t netf;
 
 	memset(&netf, 0, sizeof(netf));
-	netf.fd = open(filename, O_RDONLY);
+	netf.fd = open(filename, O_RDONLY | O_LARGEFILE);
 	if (netf.fd == -1) {
 		dprintf(2, "Can't access file \"%s\".\n", filename);
 		return (-1);
 	}
-	netf.filesize = lseek(netf.fd, 0, SEEK_END);
-	lseek(netf.fd, 0, SEEK_SET);
+	netf.filesize = lseek64(netf.fd, 0, SEEK_END);
+	lseek64(netf.fd, 0, SEEK_SET);
 	if (lsocket_connect(&netf.socket, ipaddr, port) == -1) {
 		dprintf(2, "Error: Could not connect to \"%s\" on port %u.\n", ipaddr, port);
 		return (-1);

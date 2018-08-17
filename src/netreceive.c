@@ -5,6 +5,7 @@
 ** receive function
 */
 
+#define _LARGEFILE64_SOURCE
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -70,7 +71,7 @@ int netreceive(const char *filename, uint16_t port)
 		dprintf(2, "Error: can't connect to client: %m.\n");
 		return (-1);
 	}
-	netf.fd = open(filename, O_WRONLY | O_APPEND | O_CREAT, 0666);
+	netf.fd = open(filename, O_WRONLY | O_APPEND | O_CREAT | O_LARGEFILE, 0666);
 	if (netf.fd == -1) {
 		dprintf(2, "Error: can't access \"%s\".\n", filename);
 		return (-1);
