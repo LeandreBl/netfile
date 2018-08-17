@@ -41,14 +41,19 @@ static int rcloop(lsocket_t *client, int fd)
 	printf("Downloading file of size %lu bytes:\n", (long unsigned int)filesize);
 	while (done < filesize) {
 		rd = read(client->fd, buffer, sizeof(buffer));
-		if (rd == 0 || rd == -1)
+		if (rd == 0 || rd == -1) {
+			dprintf(2, "Error: Connection aborted.\n");
 			return (-1);
+		}
 		wr = write(fd, buffer, rd);
-		if (wr == 0 || wr == -1 || rd != wr)
+		if (wr == 0 || wr == -1 || rd != wr) {
+			dprintf(2, "Error: not enough place on disk.\n");
 			return (-1);
+		}
 		done += wr;
 		netdisplay(filesize, done);
 	}
+	printf("\n");
 	return (0);
 }
 
@@ -71,8 +76,7 @@ int netreceive(const char *filename, uint16_t port)
 		dprintf(2, "Error: can't access \"%s\".\n", filename);
 		return (-1);
 	}
-	if (rcloop(&client, fd) == -1)
-		dprintf(2, "Error: connection aborted\n");
+	rcloop(&client, fd);
 	close(fd);
 	lsocket_destroy(&server);
 	lsocket_destroy(&client);
