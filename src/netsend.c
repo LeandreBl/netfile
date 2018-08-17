@@ -59,21 +59,8 @@ int netsend(const char *filename, const char *ipaddr, uint16_t port)
 		dprintf(2, "Can't access file \"%s\".\n", filename);
 		return (-1);
 	}
-#ifdef _WIN64
-	netf.filesize = _lseeki64(netf.fd, 0, SEEK_END);
-	_lseeki64(netf.fd, 0, SEEK_SET);
-#endif
-#ifdef _WIN32
-	netf.filesize = _lseeki64(netf.fd, 0, SEEK_END);
-	_lseeki64(netf.fd, 0, SEEK_SET);
-#endif
-
-#ifdef __linux__
 	netf.filesize = lseek64(netf.fd, 0, SEEK_END);
 	lseek64(netf.fd, 0, SEEK_SET);
-#else
-#error undefined architecture
-#endif
 	if (lsocket_connect(&netf.socket, ipaddr, port) == -1) {
 		dprintf(2, "Error: Could not connect to \"%s\" on port %u.\n", ipaddr, port);
 		return (-1);
