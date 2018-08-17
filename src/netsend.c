@@ -59,7 +59,7 @@ int netsend(const char *filename, const char *ipaddr, uint16_t port)
 		dprintf(2, "Can't access file \"%s\".\n", filename);
 		return (-1);
 	}
-#ifdef _WIN64
+#ifdef _WIN32
 	netf.filesize = _lseeki64(netf.fd, 0, SEEK_END);
 	_lseeki64(netf.fd, 0, SEEK_SET);
 #else
