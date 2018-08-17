@@ -63,6 +63,11 @@ int netsend(const char *filename, const char *ipaddr, uint16_t port)
 	netf.filesize = _lseeki64(netf.fd, 0, SEEK_END);
 	_lseeki64(netf.fd, 0, SEEK_SET);
 #endif
+#ifdef _WIN32
+	netf.filesize = _lseeki64(netf.fd, 0, SEEK_END);
+	_lseeki64(netf.fd, 0, SEEK_SET);
+#endif
+
 #ifdef __linux__
 	netf.filesize = lseek64(netf.fd, 0, SEEK_END);
 	lseek64(netf.fd, 0, SEEK_SET);
