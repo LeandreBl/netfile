@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <lsocket.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "netfile.h"
 
@@ -24,34 +25,32 @@ static bool is_a_packet(int fd)
 	return (false);
 }
 
-static int rcloop(lsocket_t *client, int fd)
+static int rcloop(netfile_t *netf)
 {
-	uint64_t done = 0;
-	uint64_t filesize;
 	char buffer[8192];
 	ssize_t rd;
 	ssize_t wr;
 
-	if (is_a_packet(client->fd) == false) {
+	if (is_a_packet(netf->socket.fd) == false) {
 		dprintf(2, "Error: Incorrect packet type received\n");
 		return (-1);
 	}
-	if (read(client->fd, &filesize, sizeof(filesize)) != sizeof(filesize))
+	if (read(netf->socket.fd, &netf->filesize, sizeof(netf->filesize)) != sizeof(netf->filesize))
 		return (-1);
-	printf("Downloading file of size %lu bytes:\n", (long unsigned int)filesize);
-	while (done < filesize) {
-		rd = read(client->fd, buffer, sizeof(buffer));
+	display_filesize(netf->filesize);
+	while (netf->transfered < netf->filesize) {
+		rd = read(netf->socket.fd, buffer, sizeof(buffer));
 		if (rd == 0 || rd == -1) {
 			dprintf(2, "Error: Connection aborted.\n");
 			return (-1);
 		}
-		wr = write(fd, buffer, rd);
+		wr = write(netf->fd, buffer, rd);
 		if (wr == 0 || wr == -1 || rd != wr) {
 			dprintf(2, "Error: not enough place on disk.\n");
 			return (-1);
 		}
-		done += wr;
-		netdisplay(filesize, done);
+		netf->transfered += wr;
+		netdisplay(netf);
 	}
 	printf("\n");
 	return (0);
@@ -60,25 +59,27 @@ static int rcloop(lsocket_t *client, int fd)
 int netreceive(const char *filename, uint16_t port)
 {
 	lsocket_t server;
-	lsocket_t client;
-	int fd;
+	netfile_t netf;
 
+	memset(&netf, 0, sizeof(netf));
 	if (lsocket_server(&server, port, 1) == -1) {
 		dprintf(2, "Error: can't use port %u.\n", port);
 		return (-1);
 	}
-	if (lsocket_accept(&server, &client) == -1) {
+	if (lsocket_accept(&server, &netf.socket) == -1) {
 		dprintf(2, "Error: can't connect to client: %m.\n");
 		return (-1);
 	}
-	fd = open(filename, O_WRONLY | O_APPEND | O_CREAT, 0666);
-	if (fd == -1) {
+	netf.fd = open(filename, O_WRONLY | O_APPEND | O_CREAT, 0666);
+	if (netf.fd == -1) {
 		dprintf(2, "Error: can't access \"%s\".\n", filename);
 		return (-1);
 	}
-	rcloop(&client, fd);
-	close(fd);
+	if (gettimeofday(&netf.tv, NULL) == -1)
+		return (-1);
+	rcloop(&netf);
+	close(netf.fd);
 	lsocket_destroy(&server);
-	lsocket_destroy(&client);
+	lsocket_destroy(&netf.socket);
 	return (0);
 }

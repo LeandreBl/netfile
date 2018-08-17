@@ -10,6 +10,7 @@ NAME		= netfile
 CC		= gcc
 
 LIBS		= -llsocket
+LIBS		+= -lm
 
 SRCS		= src/main.c
 SRCS		+= src/netsend.c
@@ -23,7 +24,7 @@ RM		= rm -f
 CFLAGS		= -Werror -Wall -Wextra
 CFLAGS		+= -I ./include -std=gnu99
 # uncomment this for debug flag
-# CFLAGS		+= -g3
+CFLAGS		+= -g3
 
 GREEN		= '\033[0;32m'
 NO_COLOR	= '\033[0m'

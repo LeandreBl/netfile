@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <lsocket.h>
+#include <string.h>
 
 #include "netfile.h"
 
@@ -26,47 +27,50 @@ static int send_header(lsocket_t *socket, struct stat *st)
 	return (0);
 }
 
-static int snloop(lsocket_t *socket, int fd, uint64_t filesize)
+static int snloop(netfile_t *netf)
 {
-	uint64_t done = 0;
 	char buffer[8192];
 	ssize_t rd;
 	ssize_t wr;
 
-	printf("Sending file of size %lu bytes:\n", (long unsigned int)filesize);
-	while (done < filesize) {
-		rd = read(fd, buffer, sizeof(buffer));
+	netf->transfered = 0;
+	netf->lastsize = 0;
+	display_filesize(netf->filesize);
+	while (netf->transfered < netf->filesize) {
+		rd = read(netf->fd, buffer, sizeof(buffer));
 		if (rd == 0 || rd == -1)
 			return (-1);
-		wr = write(socket->fd, buffer, rd);
+		wr = write(netf->socket.fd, buffer, rd);
 		if (wr == 0 || wr == -1 || rd != wr)
 			return (-1);
-		done += wr;
-		netdisplay(filesize, done);
+		netf->transfered += wr;
+		netdisplay(netf);
 	}
+	printf("\n");
 	return (0);
 }
 
 int netsend(const char *filename, const char *ipaddr, uint16_t port)
 {
-	lsocket_t socket;
+	netfile_t netf;
 	struct stat st;
-	int fd;
 
-	fd = open(filename, O_RDONLY);
-	if (fd == -1 || stat(filename, &st) == -1) {
+	memset(&netf, 0, sizeof(netf));
+	netf.fd = open(filename, O_RDONLY);
+	if (netf.fd == -1 || stat(filename, &st) == -1) {
 		dprintf(2, "Can't access file \"%s\".\n", filename);
 		return (-1);
 	}
-	if (lsocket_connect(&socket, ipaddr, port) == -1) {
+	netf.filesize = st.st_size;
+	if (lsocket_connect(&netf.socket, ipaddr, port) == -1) {
 		dprintf(2, "Error: Could not connect to \"%s\" on port %u.\n", ipaddr, port);
 		return (-1);
 	}
-	if (send_header(&socket, &st) == -1)
+	if (gettimeofday(&netf.tv, NULL) == -1 || send_header(&netf.socket, &st) == -1)
 		return (-1);
-	if (snloop(&socket, fd, (uint64_t)st.st_size) == -1)
+	if (snloop(&netf) == -1)
 		dprintf(2, "Error: connection aborted\n");
-	close(fd);
-	lsocket_destroy(&socket);
+	close(netf.fd);
+	lsocket_destroy(&netf.socket);
 	return (0);
 }
