@@ -14,10 +14,9 @@
 
 #include "netfile.h"
 
-static int send_header(lsocket_t *socket, struct stat *st)
+static int send_header(lsocket_t *socket, uint64_t filesize)
 {
 	uint16_t magic = 0xca0c;
-	uint64_t filesize = (uint64_t)st->st_size;
 
 	if (write(socket->fd, &magic, sizeof(magic)) != sizeof(magic) ||
 		write(socket->fd, &filesize, sizeof(filesize)) != sizeof (filesize)) {
@@ -53,20 +52,20 @@ static int snloop(netfile_t *netf)
 int netsend(const char *filename, const char *ipaddr, uint16_t port)
 {
 	netfile_t netf;
-	struct stat st;
 
 	memset(&netf, 0, sizeof(netf));
 	netf.fd = open(filename, O_RDONLY);
-	if (netf.fd == -1 || stat(filename, &st) == -1) {
+	if (netf.fd == -1) {
 		dprintf(2, "Can't access file \"%s\".\n", filename);
 		return (-1);
 	}
-	netf.filesize = st.st_size;
+	netf.filesize = lseek(netf.fd, 0, SEEK_END);
+	lseek(netf.fd, 0, SEEK_SET);
 	if (lsocket_connect(&netf.socket, ipaddr, port) == -1) {
 		dprintf(2, "Error: Could not connect to \"%s\" on port %u.\n", ipaddr, port);
 		return (-1);
 	}
-	if (gettimeofday(&netf.tv, NULL) == -1 || send_header(&netf.socket, &st) == -1)
+	if (gettimeofday(&netf.tv, NULL) == -1 || send_header(&netf.socket, netf.filesize) == -1)
 		return (-1);
 	if (snloop(&netf) == -1)
 		dprintf(2, "Error: connection aborted\n");
