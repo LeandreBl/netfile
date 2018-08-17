@@ -12,6 +12,10 @@
 # include <lsocket.h>
 # include <sys/time.h>
 
+#ifndef O_LARGEFILE
+# define O_LARGEFILE 0
+# endif
+
 typedef struct netfile_s
 {
 	int fd;
