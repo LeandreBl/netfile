@@ -1,3 +1,4 @@
 netfile
 src/*.o
 sc
+.vscode/*
