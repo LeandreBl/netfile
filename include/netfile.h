@@ -16,7 +16,7 @@
 #  define O_LARGEFILE 0
 #endif
 
-#define BUFFER_SIZE (1 << 16)
+#define BUFFER_SIZE (1 << 8)
 
 typedef struct netfile_s {
   int fd;
