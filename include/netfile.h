@@ -6,26 +6,27 @@
 */
 
 #ifndef NETFILE_H_
-# define NETFILE_H_
+#define NETFILE_H_
 
-# include <stdint.h>
-# include <lsocket.h>
-# include <sys/time.h>
+#include <stdint.h>
+#include <lsocket.h>
+#include <sys/time.h>
 
 #ifndef O_LARGEFILE
-# define O_LARGEFILE 0
-# endif
+#  define O_LARGEFILE 0
+#endif
 
-typedef struct netfile_s
-{
-	int fd;
-	uint64_t filesize;
-	uint64_t transfered;
-	int percentage;
-	double speed;
-	uint64_t lastsize;
-	struct timeval tv;
-	lsocket_t socket;
+#define BUFFER_SIZE (1 << 16)
+
+typedef struct netfile_s {
+  int fd;
+  uint64_t filesize;
+  uint64_t transfered;
+  int percentage;
+  double speed;
+  uint64_t lastsize;
+  struct timeval tv;
+  lsocket_t socket;
 } netfile_t;
 
 int netreceive(const char *filename, uint16_t port);
